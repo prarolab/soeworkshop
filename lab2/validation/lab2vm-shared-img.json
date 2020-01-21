@@ -1,0 +1,170 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "alias": {
+        "type": "string",
+        "metadata": {
+          "description": "Enter your alias"
+        }
+      },
+      "adminusername": {
+        "type": "string",
+        "metadata": {
+          "description": "username"
+        }
+      },
+      "adminpassword": {
+        "type": "securestring",
+        "metadata": {
+          "description": "Admin Password"
+        }
+      }
+  
+    },
+    "variables": {
+      "jumpboxvm1": {
+        "name": "[concat(parameters('alias'),'-soerhel75')]",
+        "size": "Standard_D2_v2",
+        "location": "East US",
+        "storagetype": "Standard_LRS",
+        "avname": "[concat(parameters('alias'),'-prodavset')]",
+  
+        "ip": "10.10.3.11"
+  
+      },
+    
+      "imagename": "[concat(parameters('alias'),'-rhel-image01')]",
+      "imagerg": "[concat(parameters('alias'),'-vmimages-rg')]",
+      "vnet1rg": "[concat(parameters('alias'),'-network-rg')]",
+      "vnet1name": "[Concat(parameters('alias'),'-vnet1')]",
+      "vnet1Ref": "[resourceId(variables('vNet1rg'),'Microsoft.Network/virtualNetworks',variables('vNet1name'))]",
+      "Subnet1Ref": "[concat(variables('vnet1Ref'),'/subnets/','Management')]",
+      "galleryName":"[concat(parameters('alias'),'imagegallery')]",
+      "galleryImageDefinitionName":"[concat(parameters('alias'),'-imagedef-linux')]",
+      "galleryImageVersionName":"latest"
+  
+  
+    },
+    "resources": [
+  
+      {
+        "apiVersion": "2017-03-30",
+        "type": "Microsoft.Compute/availabilitySets",
+        "name": "[variables('jumpboxvm1').avname]",
+        "location": "[variables('jumpboxvm1').location]",
+        "properties": {
+          "platformFaultDomainCount": 3,
+          "platformUpdateDomainCount": 3
+        },
+        "sku": {
+          "name": "Aligned"
+        }
+      },
+      {
+        "apiVersion": "2016-03-30",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[concat(variables('jumpboxvm1').name,'-nic01-pip01')]",
+        "location": "[variables('jumpboxvm1').location]",
+        "tags": {
+  
+        },
+        "properties": {
+          "publicIPAllocationMethod": "Dynamic",
+          "dnsSettings": {
+            "domainNameLabel": "[concat(variables('jumpboxvm1').name,'rdpendpoint')]"
+          }
+        }
+      },
+      {
+        "apiVersion": "2016-03-30",
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[concat(concat(variables('jumpboxvm1').name,'-nic01'))]",
+        "location": "[variables('jumpboxvm1').location]",
+        "tags": {
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('jumpboxvm1').name,'-nic01-pip01'))]"
+  
+        ],
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[variables('jumpboxvm1').ip]",
+                "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(concat(variables('jumpboxvm1').name,'-nic01-pip01')))]"
+                },
+                "subnet": {
+                  "id": "[variables('Subnet1Ref')]"
+                }
+  
+  
+              }
+            }
+          ]
+        }
+      },
+  
+      {
+        "apiVersion": "2018-04-01",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[concat(variables('jumpboxvm1').name)]",
+        "location": "[variables('jumpboxvm1').location]",
+  
+        "tags": {
+          "Environment": "Production",
+          "Owner": "Network Team"
+  
+        },
+  
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('jumpboxvm1').name,'-nic01'))]",
+          "[resourceId('Microsoft.Compute/availabilitysets', variables('jumpboxvm1').avname)]"
+        ],
+        "properties": {
+          "availabilitySet": {
+            "id": "[resourceId('Microsoft.Compute/availabilitysets', variables('jumpboxvm1').avname)]"
+  
+          },
+  
+          "hardwareProfile": {
+            "vmSize": "[variables('jumpboxvm1').size]"
+          },
+          "osProfile": {
+            "computerName": "[concat(variables('jumpboxvm1').name)]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+            "id":"[resourceId(variables('imagerg'),'Microsoft.Compute/galleries/images/versions', variables('galleryName'), variables('galleryImageDefinitionName'), variables('galleryImageVersionName'))]"
+            
+            },
+  
+            "osDisk": {
+              "name": "[concat(variables('jumpboxvm1').name,'-OS')]",
+              "createOption": "FromImage"
+            },
+            "dataDisks": [
+             
+            ]
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('jumpboxvm1').name,'-nic01'))]"
+              }
+            ]
+          }
+            },
+        "resources": [
+   
+       ]
+  
+      }
+    ],
+    "outputs": {}
+  }

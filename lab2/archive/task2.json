@@ -1,0 +1,79 @@
+{
+    "type": "Microsoft.VirtualMachineImages/imageTemplates",
+    "apiVersion": "2019-05-01-preview",
+    "location": "EastUS",
+    "dependsOn": [],
+    "tags": {
+        "imagebuilderTemplate": "windows2019"
+            },
+    "properties": {
+
+        "buildTimeoutInMinutes" : 80,
+        
+        "vmProfile": 
+            {
+            "vmSize": "Standard_D1_v2",
+            "osDiskSizeGB": 127
+            },
+
+        "source": {
+            "type": "PlatformImage",
+                "publisher": "MicrosoftWindowsServer",
+                "offer": "WindowsServer",
+                "sku": "2019-Datacenter",
+                "version": "2019.0.20190214"
+            
+        },
+        "customize": [
+	{
+                "type": "PowerShell",
+                "name": "downloadscripts",
+                "runElevated": false,
+                "inline": [
+			"md C:\\soe",
+			"cd c:\\soe",
+                	"wget https://msreadylabs.blob.core.windows.net/workshop/soelab1.zip -outfile c:\\soe\\soelab1.zip",
+              	  	"wget https://msreadylabs.blob.core.windows.net/workshop/unzip.ps1 -outfile c:\\soe\\unzip.ps1",
+               		 "dir c:\\soe"
+                ]
+        },            
+
+	{	
+                "type": "PowerShell",
+                "name": "install-hardening",
+                "runElevated": false,
+                "inline": [
+			"c:\\soe\\unzip.ps1",
+                "C:\\soe\\soelab1\\lgpo.exe /s C:\\soe\\soelab1\\secpol.inf",
+                "C:\\soe\\soelab1\\lgpo.exe /ac C:\\soe\\soelab1\\audit.csv",
+                "C:\\soe\\soelab1\\lgpo.exe /u C:\\soe\\soelab1\\user-reg.pol",
+                "C:\\soe\\soelab1\\lgpo.exe /m C:\\soe\\soelab1\\machine-reg.pol",
+                "cd c:\\soe",
+                "rmdir c:\\soe"
+                ]
+        },
+
+
+	{
+                "type": "WindowsRestart",
+                "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\buildArtifacts\\azureImageBuilderRestart.txt",
+                "restartTimeout": "5m"
+            }
+
+            
+
+        ],
+        "distribute": 
+            [
+                {   "type":"ManagedImage",
+                    "imageId": "/subscriptions/subscriptionID/resourceGroups/rgName/providers/Microsoft.Compute/images/imageName",
+                    "location": "EastUS",
+                    "runOutputName": "windows",
+                    "artifactTags": {
+                        "source": "azVmImageBuilder",
+                        "baseosimg": "windows2019"
+                    }
+                }
+            ]
+        }
+    }

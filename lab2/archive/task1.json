@@ -1,0 +1,87 @@
+
+  {
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "alias": {
+        "type": "string"
+        }
+    },
+    
+    "variables": {
+        "apiversion" :"2019-05-01-preview",
+      "resourceid":"[concat(subscription().id,'/resourceGroups/',concat(parameters('alias'),'-vmimages-rg'),'/providers/Microsoft.Compute/images/',concat(parameters('alias'),'-win2016-image01'))]",
+      "publisher": "MicrosoftWindowsServer",
+      "offer": "WindowsServer",
+      "sku": "2016-Datacenter",
+      "version": "2016.127.20190603",
+      "managedimagename":  "[concat(parameters('alias'),'-win2016-image01')]",
+      "destinationregion":  "EastUS",
+      "svclocation": "Eastus"    
+    },
+
+
+    "resources": [
+      {
+        "name": "[concat(parameters('alias'),'-task05')]",
+        "type": "Microsoft.VirtualMachineImages/imageTemplates",
+        "apiVersion": "[variables('apiversion')]",
+        "location": "[variables('svclocation')]",
+        "dependsOn": [],
+        "properties": {
+            "source": {
+                "type": "PlatformImage",
+                    "publisher": "[variables('publisher')]",
+                    "offer": "[variables('offer')]",
+                    "sku": "[variables('sku')]",
+                    "version": "[variables('version')]"
+                
+            },
+            "customize": [
+                {
+                            "type": "PowerShell",
+                            "name": "downloadscripts",
+                            "runElevated": false,
+                            "inline": [
+                        "md C:\\soe",
+                        "cd c:\\soe",
+                                "wget https://msreadylabs.blob.core.windows.net/workshop/soelab1.zip -outfile c:\\soe\\soelab1.zip",
+                                "wget https://msreadylabs.blob.core.windows.net/workshop/unzip.ps1 -outfile c:\\soe\\unzip.ps1",
+                                "dir c:\\soe"
+                            ]
+                    },            
+            
+                {	
+                            "type": "PowerShell",
+                            "name": "install-hardening",
+                            "runElevated": true,
+                            "inline": [
+                            "c:\\soe\\unzip.ps1",
+                            "Start-Process -FilePath 'C:\\soe\\soelab1\\lgpo.exe' -ArgumentList '/m C:\\soe\\soelab1\\machine-reg.pol'",
+                            "Start-Process -FilePath 'C:\\soe\\soelab1\\lgpo.exe' -ArgumentList '/u C:\\soe\\soelab1\\user-reg.pol'",
+                            "Start-Process -FilePath 'C:\\soe\\soelab1\\lgpo.exe' -ArgumentList '/ac C:\\soe\\soelab1\\audit.csv'",
+                            "Start-Process -FilePath 'C:\\soe\\soelab1\\lgpo.exe' -ArgumentList '/s C:\\soe\\soelab1\\secpol.inf'",
+                            "cd c:\\soe"
+                            ]
+                    }
+                        ],
+            "distribute": 
+                [
+                    {   "type":"ManagedImage",
+                        "imageId": "[variables('resourceid')]",
+                        "location": "[variables('destinationregion')]",
+                        "runOutputName": "[variables('managedimagename')]",
+                        "aritfactTags": {
+                          "source": "azVmImageBuilder",
+                          "releaseStatus": "staging",
+                          "type": "mdionly"
+                        }
+                    }
+                ]
+            }
+        }
+
+    
+    ]
+}    
+

@@ -1,0 +1,112 @@
+
+  {
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "alias": {
+        "type": "string"
+        },
+        "managedImageResGroup": {
+          "type": "string"
+        },
+        "imagegallery": {
+            "type": "string"
+          },
+          "imagegallerydef": {
+            "type": "string"
+          }
+    },
+    
+    "variables": {
+        "apiversion" :"2019-05-01-preview",
+      "resourceid":"[concat(subscription().id,'/resourceGroups/',parameters('managedImageResGroup'),'/providers/Microsoft.Compute/galleries/',parameters('imagegallery'),'/images/',parameters('imagegallerydef'))]",
+      "publisher": "RedHat",
+      "offer": "RHEL",
+      "sku": "7.3",
+      "version": "7.3.2017090800",
+      "managedimagename":  "[concat(parameters('alias'),'-task2-image')]",
+      "replicationRegions": ["EastUS","WestUS"] ,
+      "svclocation": "Eastus"    
+    },
+
+
+    "resources": [
+      {
+        "name": "[concat(parameters('alias'),'-task02')]",
+        "type": "Microsoft.VirtualMachineImages/imageTemplates",
+        "apiVersion": "[variables('apiversion')]",
+        "location": "[variables('svclocation')]",
+        "dependsOn": [],
+        "properties": {
+            "source": {
+                "type": "PlatformImage",
+                    "publisher": "[variables('publisher')]",
+                    "offer": "[variables('offer')]",
+                    "sku": "[variables('sku')]",
+                    "version": "[variables('version')]"
+                
+            },
+            "customize": [
+                {
+                    "type": "Shell",
+                    "name": "RunScriptFromSource",
+                    "inline": [
+                    "cd /tmp",
+                    "sudo wget https://msreadylabs.blob.core.windows.net/workshop/soelab2.sh",
+                    "sudo sh soelab2.sh"
+                    ]
+                },
+    
+                {
+                    "type": "Shell",
+                    "name": "CheckSumCompareShellScript",
+                    "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript2.sh",
+                    "sha256Checksum": "ade4c5214c3c675e92c66e2d067a870c5b81b9844b3de3cc72c49ff36425fc93"
+                },
+                
+                {
+                    "type": "File",
+                    "name": "downloadBuildArtifacts",
+                    "sourceUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html",
+                    "destination":"/tmp/index.html"
+                },
+    
+                {
+                    "type": "Shell",
+                    "name": "setupBuildPath",
+                    "inline": [
+                        "sudo mkdir /buildArtifacts",
+                        "sudo cp /tmp/index.html /buildArtifacts/index.html"
+                    ]
+                },
+    
+                {
+                    "type": "Shell",
+                    "name": "InstallUpgrades",
+                    "inline": [
+                        "sudo yum update -y"
+                    ]
+                }
+    
+            ],
+            "distribute":  
+    [
+        {
+          "type": "SharedImage",
+          "galleryImageId": "[variables('resourceid')]",
+          "runOutputName": "[variables('managedimagename')]",
+          "aritfactTags": {
+            "source": "azVmImageBuilder",
+            "releaseStatus": "staging",
+            "type": "sigonly"
+          },
+          "replicationRegions": "[variables('replicationRegions')]"
+        
+        }
+      ]
+  }
+}
+]
+
+}    
+
