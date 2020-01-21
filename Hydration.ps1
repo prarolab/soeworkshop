@@ -19,6 +19,7 @@ $defaultHomePage ="http://"+"$aadAppName"
 $IDENTIFIERURI =[string]::Format("http://localhost:8080/{0}",[Guid]::NewGuid().ToString("N"));
 $keyvaultrg =$alias+'-keyvault-rg'
 $networkrg =$alias+'-network-rg'
+$acrrg =$alias+'-container-rg'
 $keyvaultName =$alias +'-akeyvault'
 #$omsname=$alias+'-omsready'
 #$omsrg= $alias+'-oms-rg'
@@ -29,6 +30,8 @@ $imagegalname = $alias+'imagegallery'
 $imagegaldeflin= $alias +'-imagedef-linux'
 $imagegaldefwin= $alias +'-imagedef-win'
 $imagepub =$alias +'-myimages'
+
+$acr=$alias +'acr01'
 
 ######-Account Variables
 $aztenantid=$sub.Subscription.TenantId
@@ -51,7 +54,7 @@ Register-azResourceProvider -ProviderNamespace Microsoft.Network
 Import-Module Az.Compute
 
 
-$function =@("keyvault","network","vmimages","jumpbox")
+$function =@("keyvault","network","vmimages","jumpbox","container")
 
         foreach ($rg in $function)
 
@@ -245,6 +248,34 @@ $function =@("keyvault","network","vmimages","jumpbox")
 
 $scope2 = '/subscriptions/' + $azsubid
 New-azRoleAssignment  -ApplicationId $aadClientID -RoleDefinitionName Contributor -Scope $scope2
+
+
+
+# Create a Container registry
+
+    Try
+        {
+            $acrobj = Get-AzContainerRegistry -ResourceGroupName $acrrg -Name $acr -ErrorAction SilentlyContinue
+        }
+    Catch [System.ArgumentException]
+        {
+            Write-Host "Couldn't find Azure Container Registry: $acr";
+            $acrobj = $null;
+        }
+    
+     #Create a new Shared Image Gallery if vault doesn't exist
+    if (-not $acrobj)
+        {
+            Write-Host "Creating new azure container registry:  ($acr)";
+          
+              $registry = New-AzContainerRegistry `
+                           -Name $acr `
+                           -ResourceGroupName $acrrg `
+                           -EnableAdminUser `
+                           -Sku Premium -
+            
+            Write-Host "Created a new Azure Container registry named $acr ";
+        }
 
 
 
