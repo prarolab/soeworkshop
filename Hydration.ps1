@@ -272,7 +272,7 @@ New-azRoleAssignment  -ApplicationId $aadClientID -RoleDefinitionName Contributo
                            -Name $acr `
                            -ResourceGroupName $acrrg `
                            -EnableAdminUser `
-                           -Sku Premium -
+                           -Sku Premium 
             
             Write-Host "Created a new Azure Container registry named $acr ";
         }
