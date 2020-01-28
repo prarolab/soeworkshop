@@ -3,11 +3,7 @@
 
 )
 
-<<<<<<< HEAD
-Login-azaccount
-=======
 Login-azAccount
->>>>>>> 7c3e0d1346c0f710e87b728648506efd7a3e49a1
 
 Write-Host 'Please log into Azure now' -foregroundcolor Green;
 
