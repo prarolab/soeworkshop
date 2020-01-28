@@ -5,6 +5,7 @@
 
 
 Write-Host 'Please log into Azure now' -foregroundcolor Green;
+Login-azaccount
 
 $Subscription = (Get-azSubscription) |Select Name, Id | Out-GridView -Title "Select Azure Subscription " -PassThru
 
