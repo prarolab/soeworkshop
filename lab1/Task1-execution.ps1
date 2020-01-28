@@ -2,7 +2,7 @@
   [string] [Parameter(Mandatory=$true)] $alias
 
 )
-
+Login-azAccount
 
 Write-Host 'Please log into Azure now' -foregroundcolor Green;
 
