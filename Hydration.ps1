@@ -308,7 +308,7 @@ New-azRoleAssignment  -ApplicationId $aadClientID -RoleDefinitionName Contributo
 	
 	
 
-New-AzRoleAssignment -ObjectId ef511139-6170-438e-a6e1-763dc31bdf74 -Scope /subscriptions/$subscriptionID/resourceGroups/$vmimagerg -RoleDefinitionName Contributor
+New-AzRoleAssignment -ObjectId ef511139-6170-438e-a6e1-763dc31bdf74 -Scope /subscriptions/$azsubid/resourceGroups/$vmimagerg -RoleDefinitionName Contributor
 
 
 
