@@ -1,0 +1,58 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: ready2020
+
+steps:
+- task: AzureCLI@2 # Update permission for spn (using azcli)
+  displayName: 'Provide the SPN access to keyvault'
+  inputs:
+    connectionType: 'Azure Resource Manager'
+    azureSubscription: '$(serviceconnection)'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript:    
+      Sec_per=$(az keyvault set-policy --name $(alias)-akeyvault --secret-permissions get list --spn "889bf27a-38c9-4f3c-b5a6-0739c60a0947")
+      sleep 10
+    enabled: false
+- task: AzureKeyVault@1
+  inputs:
+    azureSubscription: '$(serviceconnection)'
+    KeyVaultName: '$(alias)-akeyvault'
+    SecretsFilter: '*'
+
+
+- task: AzureImageBuilderTask@1
+  inputs:
+    imageSource: 'marketplace'
+    baseImage: 'OpenLogic:CentOS:7.6:linux'
+    
+    inlineScript: |
+      cd /tmp
+      sudo wget https://msreadylabs.blob.core.windows.net/workshop/soelab2.sh
+      sudo sh soelab2.sh
+    storageAccountName: '$(alias)storageac001'
+    imageIdForDistribute: '/subscriptions/$(subscriptionId)/resourceGroups/$(alias)-vmimages-rg/providers/Microsoft.Compute/images/$(alias)-task3-image03'
+    managedImageLocation: 'eastus'
+    ibSubscription: '$(serviceconnection)'
+    ibAzureResourceGroup: '$(alias)-vmimages-rg'
+    ibLocation: 'eastus'
+
+- task: AzureCLI@1
+  displayName: 'Azure CLI '
+  inputs:
+    azureSubscription: '$(serviceconnection)'
+    
+    scriptLocation: inlineScript
+    inlineScript: |
+      az --version
+      az vm create --resource-group "$(alias)-vmimages-rg" --name $(alias)-adoVM --admin-username "$(adminuser)" --location "eastus" --image "/subscriptions/$(subscriptionId)/resourceGroups/$(alias)-vmimages-rg/providers/Microsoft.Compute/images/$(alias)-task3-image03" --admin-password "$(adminpw)"
