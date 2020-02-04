@@ -31,6 +31,9 @@ $imagegaldeflin= $alias +'-imagedef-linux'
 $imagegaldefwin= $alias +'-imagedef-win'
 $imagepub =$alias +'-myimages'
 
+$strrg =$alias+'-vmimages-rg'
+$str=$alias +'storageac001'
+
 $acr=$alias +'acr01'
 
 ######-Account Variables
@@ -276,8 +279,36 @@ New-azRoleAssignment  -ApplicationId $aadClientID -RoleDefinitionName Contributo
             
             Write-Host "Created a new Azure Container registry named $acr ";
         }
+	
+	
+	
+	  Try
+        {
+            $acrstr = Get-Azstorageaccount -ResourceGroupName $strrg -Name $str -ErrorAction SilentlyContinue
+        }
+    Catch [System.ArgumentException]
+        {
+            Write-Host "Couldn't find Azure Storage Account: $str";
+            $acrstr = $null;
+        }
+    
+     #Create a new Shared Image Gallery if vault doesn't exist
+    if (-not $acrstr)
+        {
+            Write-Host "Creating new azure container registry:  ($str)";
+          
+              $storage = New-Azstorageaccount `
+                           -Name $str `
+                           -ResourceGroupName $strrg `
+                           -location 'eastus' `
+                           -Skuname Standard_LRS 
+            
+            Write-Host "Created a new Azure Storage Account named $str ";
+        }
+	
+	
 
-
+New-AzRoleAssignment -ObjectId ef511139-6170-438e-a6e1-763dc31bdf74 -Scope /subscriptions/$subscriptionID/resourceGroups/$vmimagerg -RoleDefinitionName Contributor
 
 
 
