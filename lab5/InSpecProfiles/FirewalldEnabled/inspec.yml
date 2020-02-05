@@ -1,0 +1,9 @@
+name: Firewalld is Enabled
+title: Firewalld is Enabled
+maintainer: Microsoft Corporation
+summary: Validates that the Firewalld package is installed, running, and that the default zone is public
+copyright: Microsoft Corporation
+license: MIT
+version: 1.0.0
+supports:
+  - os-family: unix
