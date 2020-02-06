@@ -10,6 +10,6 @@ Login-AzAccount
 $Subscription = (Get-AzSubscription) |Select Name, Id | Out-GridView -Title "Select Azure Subscription " -PassThru
 
 $sub=Select-AzSubscription -SubscriptionName $Subscription.Name
-''
+
 New-AzResourceGroupDeployment -Name "SOE-Lab2-VMDeployment" -ResourceGroupName $vmimagerg -TemplateFile "https://raw.githubusercontent.com/prarolab/soephase2/master/Task2/artefacts/lab2westus/lab2vm-westus.json" -TemplateParameterObject @{"alias"=$alias}
 
