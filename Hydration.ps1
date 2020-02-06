@@ -310,6 +310,11 @@ New-azRoleAssignment  -ApplicationId $aadClientID -RoleDefinitionName Contributo
 
 New-AzRoleAssignment -ObjectId ef511139-6170-438e-a6e1-763dc31bdf74 -Scope /subscriptions/$azsubid/resourceGroups/$vmimagerg -RoleDefinitionName Contributor
 
+Write-Host "`t Hydration execution in progress but You can proceed with labs" -foregroundcolor Green;
+
+    
+
+
 
 
 New-azResourceGroupDeployment -Name "Vnet-Deployment" -ResourceGroupName $networkrg -TemplateUri 'https://msreadylabs.blob.core.windows.net/workshop/azuredeployCopy.json' -TemplateParameterObject @{"alias"=$alias}
@@ -317,8 +322,7 @@ New-azResourceGroupDeployment -Name "Vnet-Deployment" -ResourceGroupName $networ
 New-azResourceGroupDeployment -Name "devopsagent" -ResourceGroupName $networkrg -TemplateUri 'https://msreadylabs.blob.core.windows.net/workshop/azuredevopsagent.json' -TemplateParameterObject @{"alias"=$alias}
 
 
-
-    if((Test-Path  $outputpath) -eq 'True' )
+if((Test-Path  $outputpath) -eq 'True' )
         {
             Clear-Content $outputpath
         }
@@ -341,3 +345,6 @@ Write-Host "Please note  AzureADClientId, ,ClientSecret, Subcription and Tenant 
  Write-Host "`t TenantId: $aztenantid" -foregroundcolor Green;
  Write-Host "`t SubscriptionId: $azsubid" -foregroundcolor Green;
     Write-Host "`t keyVaultNAme: $keyvaultName" -foregroundcolor Green;
+
+
+    
