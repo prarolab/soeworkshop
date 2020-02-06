@@ -19,7 +19,7 @@ $hash1 = @{ alias = $alias; managedImageResGroup = $($alias+'-vmimages-rg');imag
 New-AzResourceGroupDeployment -Name task1-vmimage -ResourceGroupName "$($alias+'-vmimages-rg')" -TemplateFile .\task2-sig.json -TemplateParameterObject $hash1
 
 #create a hardened windows 2016 image
-az resource invoke-action --resource-group $($alias+'-vmimages-rg') --resource-type  Microsoft.VirtualMachineImages/imageTemplates -n $($alias+'-task02') --action Run
+#az resource invoke-action --resource-group $($alias+'-vmimages-rg') --resource-type  Microsoft.VirtualMachineImages/imageTemplates -n $($alias+'-task02') --action Run
 
 
 
