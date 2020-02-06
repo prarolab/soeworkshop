@@ -315,6 +315,7 @@ Write-Host "`t Hydration execution in progress but You can proceed with labs" -f
     
 
 
+New-azResourceGroupDeployment -Name "Vnet-Deployment02" -ResourceGroupName $networkrg -TemplateUri 'https://raw.githubusercontent.com/prarolab/soephase2/master/Task2/artefacts/lab2westus/WestUS-network.json' -TemplateParameterObject @{"alias"=$alias}
 
 
 New-azResourceGroupDeployment -Name "Vnet-Deployment" -ResourceGroupName $networkrg -TemplateUri 'https://msreadylabs.blob.core.windows.net/workshop/azuredeployCopy.json' -TemplateParameterObject @{"alias"=$alias}
