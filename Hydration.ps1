@@ -13,6 +13,8 @@ $Subscription = (Get-azSubscription) |Select Name, Id | Out-GridView -Title "Sel
 
 $sub=Select-azSubscription -SubscriptionName $Subscription.Name
 
+$sub1=$Subscription.Name
+
 $aadAppName =$alias +"msreadylabapp"
 
 $defaultHomePage ="http://"+"$aadAppName"
@@ -337,15 +339,22 @@ if((Test-Path  $outputpath) -eq 'True' )
         $aztenantid|Out-File $outputpath -Append
         Write-Output "`r`n Keyvault Name  ---------->>>>" |Out-File $outputpath -Append
         $keyvaultName|Out-File $outputpath -Append
+	 Write-Output "`r`n Subscription Name  ---------->>>>" |Out-File $outputpath -Append
+        $sub1|Out-File $outputpath -Append
 
 Start $outputpath
+
 
 Write-Host "Please note  AzureADClientId, ,ClientSecret, Subcription and Tenant detail. Refer $outputpath  " -foregroundcolor Green;
     Write-Host "`t aadClientID: $aadClientID" -foregroundcolor Green;
  Write-Host "`t aadClientSecret: $aadClientSecret " -foregroundcolor Green;
  Write-Host "`t TenantId: $aztenantid" -foregroundcolor Green;
  Write-Host "`t SubscriptionId: $azsubid" -foregroundcolor Green;
+   Write-Host "`t SubscriptionName: $sub1" -foregroundcolor Green;
     Write-Host "`t keyVaultNAme: $keyvaultName" -foregroundcolor Green;
+    
+    
+
 
 
     
