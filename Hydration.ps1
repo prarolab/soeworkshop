@@ -139,7 +139,7 @@ $function =@("keyvault","network","vmimages","jumpbox","container")
             Write-Host "Created a new KeyVault named $keyVaultName to store encryption keys";
         }
     # Specify privileges to the vault for the AAD application - https://msdn.microsoft.com/en-us/library/mt603625.aspx
-    Set-azKeyVaultAccessPolicy -VaultName $keyVaultName -ServicePrincipalName $aadClientID -PermissionsToKeys wrapKey -PermissionsToSecrets set;
+    Set-azKeyVaultAccessPolicy -VaultName $keyVaultName -ServicePrincipalName $aadClientID -PermissionsToKeys wrapKey -PermissionsToSecrets get,set,list
 
     Set-azKeyVaultAccessPolicy -VaultName $keyVaultName -EnabledForDiskEncryption -EnabledForTemplateDeployment;
 
