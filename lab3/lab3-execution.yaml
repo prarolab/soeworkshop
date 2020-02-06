@@ -13,17 +13,6 @@ variables:
 - group: ready2020
 
 steps:
-- task: AzureCLI@2 # Update permission for spn (using azcli)
-  displayName: 'Provide the SPN access to keyvault'
-  inputs:
-    connectionType: 'Azure Resource Manager'
-    azureSubscription: '$(serviceconnection)'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript:    
-      Sec_per=$(az keyvault set-policy --name $(alias)-akeyvault --secret-permissions get list --spn "889bf27a-38c9-4f3c-b5a6-0739c60a0947")
-      sleep 10
-    enabled: false
 - task: AzureKeyVault@1
   inputs:
     azureSubscription: '$(serviceconnection)'
@@ -55,4 +44,4 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       az --version
-      az vm create --resource-group "$(alias)-vmimages-rg" --name $(alias)-adoVM --admin-username "$(adminuser)" --location "eastus" --image "/subscriptions/$(subscriptionId)/resourceGroups/$(alias)-vmimages-rg/providers/Microsoft.Compute/images/$(alias)-task3-image03" --admin-password "$(adminpw)"
+      az vm create --resource-group "$(alias)-vmimages-rg" --name $(alias)-adoVM --admin-username "$(alias)-admin" --location "eastus" --image "/subscriptions/$(subscriptionId)/resourceGroups/$(alias)-vmimages-rg/providers/Microsoft.Compute/images/$(alias)-task3-image03" --admin-password "$(adminpassword)"
